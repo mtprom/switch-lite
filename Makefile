@@ -35,7 +35,7 @@ $(BIN): $(SRCS) Info.plist SwitchLite.icns
 	cp Info.plist $(APP)/Contents/Info.plist
 	cp SwitchLite.icns $(APP)/Contents/Resources/SwitchLite.icns
 	printf 'APPL????' > $(APP)/Contents/PkgInfo
-	codesign --force --sign - $(APP)
+	codesign --force --deep --sign - --identifier "$$(plutil -extract CFBundleIdentifier raw Info.plist)" $(APP)
 
 clean:
 	rm -rf $(APP)

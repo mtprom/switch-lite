@@ -22,8 +22,19 @@
     // A previous crash may have left Cmd-Tab disabled. Give it back before this launch takes it.
     SLRecoverInterruptedCommandTab();
 
-    NSDictionary *options = @{(__bridge NSString *)kAXTrustedCheckOptionPrompt: @YES};
-    AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
+    // Prompt at most once. A later launch of the same signature just checks trust,
+    // so quit and reopen does not show the Accessibility dialog again.
+    if (!AXIsProcessTrusted()) {
+        NSString *dir = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Switch Lite"];
+        NSString *asked = [dir stringByAppendingPathComponent:@"accessibility-asked"];
+        NSFileManager *files = [NSFileManager defaultManager];
+        if (![files fileExistsAtPath:asked]) {
+            [files createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:NULL];
+            [[NSData data] writeToFile:asked atomically:YES];
+            NSDictionary *options = @{(__bridge NSString *)kAXTrustedCheckOptionPrompt: @YES};
+            AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
+        }
+    }
 
     _mru = [SLMRU new];
     [_mru refreshFrontWindow];

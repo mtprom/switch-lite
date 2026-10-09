@@ -165,12 +165,20 @@ static NSInteger SLInitialSelection(NSInteger count, BOOL forward) {
     [self openScopedToFrontApp:YES forward:forward];
 }
 
+static NSString *SLCaptureAskedPath(void) {
+    NSString *dir = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Switch Lite"];
+    [[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:NULL];
+    return [dir stringByAppendingPathComponent:@"screen-capture-asked"];
+}
+
 - (BOOL)requestCaptureAccessOnce {
+    // Granted for this signature: capture, and do not ask. A denial or an
+    // earlier request stays denied until the user turns Screen Recording on.
     if (CGPreflightScreenCaptureAccess()) return YES;
-    if (!_didRequestCapture) {
-        _didRequestCapture = YES;
-        CGRequestScreenCaptureAccess();
-    }
+    if (_didRequestCapture || [[NSFileManager defaultManager] fileExistsAtPath:SLCaptureAskedPath()]) return NO;
+    _didRequestCapture = YES;
+    [[NSData data] writeToFile:SLCaptureAskedPath() atomically:YES];
+    CGRequestScreenCaptureAccess();
     return CGPreflightScreenCaptureAccess();
 }
 
