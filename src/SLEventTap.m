@@ -90,9 +90,9 @@ static NSPoint SLCocoaPoint(CGEventRef event) {
     return NSMakePoint(quartz.x, height - quartz.y);
 }
 
-static BOOL SLOptionIsPhysicallyDown(void) {
+static BOOL SLCommandIsPhysicallyDown(void) {
     CGEventFlags flags = CGEventSourceFlagsState(kCGEventSourceStateCombinedSessionState);
-    return (flags & kCGEventFlagMaskAlternate) != 0;
+    return (flags & kCGEventFlagMaskCommand) != 0;
 }
 
 static CGEventRef SLTapCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *userInfo) {
@@ -106,7 +106,7 @@ static CGEventRef SLTapCallback(CGEventTapProxy proxy, CGEventType type, CGEvent
 @implementation SLEventTap {
     CFMachPortRef _port;
     CFRunLoopSourceRef _source;
-    BOOL _optionDown;
+    BOOL _commandDown;
     BOOL _ateMouseDown;
     BOOL _loggedFailure;
 }
@@ -128,11 +128,11 @@ static CGEventRef SLTapCallback(CGEventTapProxy proxy, CGEventType type, CGEvent
     BOOL open = [handler switcherIsOpen];
 
     if (type == kCGEventFlagsChanged) {
-        if (_optionDown && !option && open) [handler commit];
-        _optionDown = option;
+        if (_commandDown && !command && open) [handler commit];
+        _commandDown = command;
         return event;
     }
-    _optionDown = option;
+    _commandDown = command;
 
     if (type == kCGEventLeftMouseDown && open) {
         _ateMouseDown = YES;
@@ -165,15 +165,17 @@ static CGEventRef SLTapCallback(CGEventTapProxy proxy, CGEventType type, CGEvent
         return NULL;
     }
 
-    if (!open && option && !command && !control && tabOrGrave) {
+    // Cmd-Tab lists every window. Cmd-grave lists the front app. Shift goes backward.
+    // Option-Tab is left for the system.
+    if (!open && command && !option && !control && tabOrGrave) {
         if (down) {
             BOOL forward = !shift;
             if (key == kVK_ANSI_Grave) [handler openFrontAppWindowsForward:forward];
             else [handler openAllWindowsForward:forward];
             // The Screen Recording prompt can block this callback, so the tap may miss
-            // Option-up. Read the keyboard and confirm if Option is already up.
-            _optionDown = SLOptionIsPhysicallyDown();
-            if ([handler switcherIsOpen] && !_optionDown) [handler commit];
+            // Command-up. Read the keyboard and confirm if Command is already up.
+            _commandDown = SLCommandIsPhysicallyDown();
+            if ([handler switcherIsOpen] && !_commandDown) [handler commit];
         }
         return NULL;
     }
@@ -256,6 +258,10 @@ static CGEventRef SLTapCallback(CGEventTapProxy proxy, CGEventType type, CGEvent
         return;
     }
     if (!CGEventTapIsEnabled(_port)) CGEventTapEnable(_port, true);
+}
+
+- (BOOL)isRunning {
+    return _port != NULL && CGEventTapIsEnabled(_port);
 }
 
 - (void)stop {

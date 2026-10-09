@@ -33,6 +33,8 @@ static const CGFloat SLMinimumWindowEdge = 48.0;
 static BOOL SLIsSkippedOwner(NSString *owner) {
     if (owner.length == 0) return NO;
     NSString *name = owner.lowercaseString;
+    // CursorUIViewService owns the small chrome windows. The editor process is "Cursor".
+    if ([name isEqualToString:@"cursoruiviewservice"] || [name hasSuffix:@"uiviewservice"]) return YES;
     return [name isEqualToString:@"dock"]
         || [name isEqualToString:@"window server"]
         || [name isEqualToString:@"windowserver"]

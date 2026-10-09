@@ -8,6 +8,8 @@
 	<string>Switch Lite</string>
 	<key>CFBundleExecutable</key>
 	<string>SwitchLite</string>
+	<key>CFBundleIconFile</key>
+	<string>SwitchLite</string>
 	<key>CFBundleIdentifier</key>
 	<string>app.switchlite.SwitchLite</string>
 	<key>CFBundleInfoDictionaryVersion</key>

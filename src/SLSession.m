@@ -119,7 +119,7 @@ static NSInteger SLInitialSelection(NSInteger count, BOOL forward) {
         [self cycleForward:forward];
         return;
     }
-    // The Screen Recording prompt runs a nested loop. Ignore a re-entrant Option-Tab.
+    // The Screen Recording prompt runs a nested loop. Ignore a re-entrant Cmd-Tab.
     if (_opening) return;
     if ([NSScreen screens].count == 0) {
         NSBeep();

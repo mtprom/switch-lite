@@ -23,4 +23,5 @@
 - (void)start;
 - (void)stop;
 - (void)ensureEnabled;
+- (BOOL)isRunning;
 @end

@@ -2,6 +2,7 @@
 #import "SLEventTap.h"
 #import "SLMRU.h"
 #import "SLSession.h"
+#import "SLSystemHotKey.h"
 
 @implementation SLAppDelegate {
     SLMRU *_mru;
@@ -11,8 +12,16 @@
     NSUInteger _ticks;
 }
 
+- (void)armCommandTabIfTapIsRunning {
+    // Take Cmd-Tab only while the tap can actually receive it. Otherwise macOS keeps it.
+    if ([_tap isRunning]) SLDisableSystemCommandTab();
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
     (void)notification;
+    // A previous crash may have left Cmd-Tab disabled. Give it back before this launch takes it.
+    SLRecoverInterruptedCommandTab();
+
     NSDictionary *options = @{(__bridge NSString *)kAXTrustedCheckOptionPrompt: @YES};
     AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
 
@@ -22,6 +31,7 @@
     _tap = [SLEventTap new];
     _tap.handler = _session;
     [_tap start];
+    [self armCommandTabIfTapIsRunning];
 
     _timer = [NSTimer timerWithTimeInterval:0.5
                                      target:self
@@ -38,7 +48,10 @@
         // Ids only. Skip the poll while a session is showing so capture has the window server.
         if (![_session switcherIsOpen]) [_mru refreshFrontWindow];
         _ticks += 1;
-        if (_ticks % 4 == 0) [_tap ensureEnabled];
+        if (_ticks % 4 == 0) {
+            [_tap ensureEnabled];
+            [self armCommandTabIfTapIsRunning];
+        }
     }
 }
 
@@ -48,6 +61,7 @@
     _timer = nil;
     [_session cancel];
     [_tap stop];
+    SLRestoreSystemCommandTab();
 }
 
 @end
