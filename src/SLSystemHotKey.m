@@ -116,10 +116,13 @@ static void SLOnSignal(int sig) {
 void SLDisableSystemCommandTab(void) {
     if (gDisabled) return;
     SLLoadHotKeyAPI();
-    if (!gSetHotKey || !gIsHotKey) return;
+    if (!gSetHotKey) {
+        NSLog(@"Switch Lite: could not turn off the system Command-Tab shortcut.");
+        return;
+    }
     SLRecoverInterruptedCommandTab();
     for (int i = 0; i < kCommandTabHotKeyCount; i++) {
-        gSaved[i] = gIsHotKey(kCommandTabHotKeys[i]) ? 1 : 0;
+        gSaved[i] = gIsHotKey ? (gIsHotKey(kCommandTabHotKeys[i]) ? 1 : 0) : 1;
     }
     SLWriteMarker(gSaved);
     int off[2] = {0, 0};

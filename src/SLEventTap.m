@@ -237,8 +237,14 @@ static CGEventRef SLTapCallback(CGEventTapProxy proxy, CGEventType type, CGEvent
         CGEventMaskBit(kCGEventLeftMouseDown) |
         CGEventMaskBit(kCGEventLeftMouseUp) |
         CGEventMaskBit(kCGEventScrollWheel);
-    _port = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
+    // The Dock handles Command-Tab inside the WindowServer, before a session tap
+    // ever sees the key. A HID tap is in front of that, so the key can be swallowed.
+    _port = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
                              mask, SLTapCallback, (__bridge void *)self);
+    if (!_port) {
+        _port = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
+                                 mask, SLTapCallback, (__bridge void *)self);
+    }
     if (!_port) {
         if (!_loggedFailure) {
             NSLog(@"Switch Lite: event tap unavailable. Enable Accessibility for Switch Lite.");
@@ -247,6 +253,7 @@ static CGEventRef SLTapCallback(CGEventTapProxy proxy, CGEventType type, CGEvent
         return;
     }
     _loggedFailure = NO;
+    NSLog(@"Switch Lite: listening for Command-Tab.");
     _source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, _port, 0);
     CFRunLoopAddSource(CFRunLoopGetMain(), _source, kCFRunLoopCommonModes);
     CGEventTapEnable(_port, true);
