@@ -1,5 +1,6 @@
 #import "SLIconCache.h"
 #import "SLImage.h"
+#import <AppKit/AppKit.h>
 
 static const size_t SLIconPixels = 64; // 32pt at 2x
 
