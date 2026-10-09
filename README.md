@@ -6,25 +6,32 @@ It is a clean-room app. It does not include AltTab source.
 
 ## Build and run
 
-On a Mac with the Xcode command line tools (macOS 12 or later):
+On a Mac with the Xcode command line tools (macOS 12 or later). Put the source in `~/Developer/switch-lite`. `make` creates `~/Applications` if it is missing and installs `~/Applications/SwitchLite.app`. That is the per-user Applications folder, so it does not ask for an admin password.
 
 ```sh
 xcode-select --install
+mkdir -p ~/Developer
+cd ~/Developer
+git clone <repository-url> switch-lite
+cd switch-lite
+git checkout cursor/switch-lite-app-f6e4
 make
-open SwitchLite.app
+open ~/Applications/SwitchLite.app
 ```
 
-`make` compiles with clang, links AppKit, Carbon, ApplicationServices, and CoreGraphics, and ad-hoc signs `SwitchLite.app`. The bundle id is `app.switchlite.SwitchLite`.
+Run this from `~/Developer/switch-lite`, the folder that contains the `Makefile`. Running `make` in your home folder fails because there is no project there.
+
+`make` compiles with clang, links AppKit, Carbon, ApplicationServices, and CoreGraphics, ad-hoc signs the app, and copies it to `~/Applications/SwitchLite.app`. The bundle id is `app.switchlite.SwitchLite`.
 
 `open` returns immediately. Nothing appears in the Dock. The process stays running until you quit it. Hold Option and press Tab to show the switcher.
 
-The first time Gatekeeper blocks the ad-hoc signature, right-click `SwitchLite.app` and choose Open, or run:
+The first time Gatekeeper blocks the ad-hoc signature, right-click `~/Applications/SwitchLite.app` and choose Open, or run:
 
 ```sh
-xattr -dr com.apple.quarantine SwitchLite.app
+xattr -dr com.apple.quarantine ~/Applications/SwitchLite.app
 ```
 
-Switch Lite does not register a login item. To start it at login, add `SwitchLite.app` yourself in System Settings → General → Login Items.
+Switch Lite does not register a login item. To start it at login, add `~/Applications/SwitchLite.app` yourself in System Settings → General → Login Items.
 
 ## Shortcuts
 
