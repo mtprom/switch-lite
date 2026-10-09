@@ -1,0 +1,4 @@
+SwitchLite.app
+agent-tools/
+*.o
+.DS_Store
