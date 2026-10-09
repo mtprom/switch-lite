@@ -20,9 +20,9 @@
 - (NSString *)displaySubtitle;
 @end
 
-// Layer 0 windows large enough to be real windows, skipping this process,
-// system chrome, fully transparent windows, and Cursor UI service windows.
-// Off-screen windows are included so another Space can be focused. Each
-// CGWindowID appears once. No images are read here.
+// Layer 0 windows of regular apps, large enough to be real windows.
+// A window is listed only when it is on screen or minimized.
+// Agents, services, AutoFill, Siri, and background-activity UI are omitted.
+// Each CGWindowID appears once. No images are read here.
 NSArray<SLWindow *> *SLCollectWindows(void);
 CGWindowID SLFrontmostWindowID(void);
